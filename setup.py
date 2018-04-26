@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(name = "icelandic_holidays",
       version = "0.6.1",
@@ -30,5 +30,6 @@ setup(name = "icelandic_holidays",
       url = "http://github.com/solvip/icelandic_holidays",
       description = "A Python library written to determine if a day is an Icelandic holiday or a business day.",
       long_description = open("README.md").read(),
-      py_modules = ["icelandic_holidays"]
+      py_modules = ["icelandic_holidays"],
+      test_suite='tests',
     )

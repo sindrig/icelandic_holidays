@@ -38,7 +38,8 @@ As of 2013, these are the public holidays:
 - Good friday, the friday preceding easter (föstudagurinn langi)
 - Easter sunday (páskadagur)
 - Easter monday (annar í páskum)
-- First day of summer, the first thursday after 18th of April (Sumardagurinn fyrsti)
+- First day of summer, the first thursday after 18th of April
+    (Sumardagurinn fyrsti)
 - May 1st, labour day (verkalýðsdagurinn)
 - Ascension of Jesus, 40 days after Easter (Uppstigningardagur)
 - Pentecost, 49 days after Easter (hvítasunnudagur)
@@ -58,20 +59,25 @@ references:
 """
 
 from datetime import datetime, timedelta
+from . import holiday_names
 
-__holiday_funs = []
+__holiday_funs = {}
 
-def __holiday_fun(f):
-    if f not in __holiday_funs:
-        __holiday_funs.append(f)
-    return f
+
+def __holiday_fun(name):
+    def inner(f):
+        if name not in __holiday_funs:
+            __holiday_funs[name] = f
+        return f
+    return inner
+
 
 def get_easter_sunday(year):
     """ Get easter sunday for year.  Works for years after 1583.
     See http://www.smart.net/~mmontes/nature1876.html """
     if year < 1583:
         raise ValueError("year must be larger than 1583")
-    
+
     a = year % 19
     b = int(year / 100)
     c = int(year % 100)
@@ -82,38 +88,44 @@ def get_easter_sunday(year):
     h = (19 * a + b - d - g + 15) % 30
     i = int(c / 4)
     k = c % 4
-    l = (32 + 2 * e + 2 * i - h - k) % 7
-    m = int((a + 11 * h + 22 * l) / 451)
-    month = int((h + l - 7 * m + 114) / 31)
-    day = ((h + l - 7 * m + 114) % 31) + 1
+    la = (32 + 2 * e + 2 * i - h - k) % 7
+    m = int((a + 11 * h + 22 * la) / 451)
+    month = int((h + la - 7 * m + 114) / 31)
+    day = ((h + la - 7 * m + 114) % 31) + 1
 
     return datetime(year, month, day)
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.JANUARY_1ST)
 def __january_1st(dt):
     return dt.month == 1 and dt.day == 1
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.HOLY_THURSDAY)
 def __holy_thursday(dt):
     return dt.date() == (get_easter_sunday(dt.year) - timedelta(days=3)).date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.GOOD_FRIDAY)
 def __good_friday(dt):
     return dt.date() == (get_easter_sunday(dt.year) - timedelta(days=2)).date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.EASTER_SUNDAY)
 def __easter_sunday(dt):
     return get_easter_sunday(dt.year).date() == dt.date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.EASTER_MONDAY)
 def __easter_monday(dt):
     return get_easter_sunday(dt.year).date() + timedelta(days=1) == dt.date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.FIRST_DAY_OF_SUMMER)
 def __first_day_of_summer(dt):
     if dt.month != 4:
         return False
-    
+
     d = datetime(dt.year, 4, 19)
     while True:
         if d.isoweekday() == 4:
@@ -121,27 +133,33 @@ def __first_day_of_summer(dt):
         d = d + timedelta(days=1)
     return dt.date() == d.date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.MAY_1ST)
 def __may_1st(dt):
     return dt.month == 5 and dt.day == 1
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.ASCENSION_OF_JESUS)
 def __ascension_of_jesus(dt):
     return dt.date() == (get_easter_sunday(dt.year) + timedelta(39)).date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.PENTECOST)
 def __pentecost(dt):
     return dt.date() == (get_easter_sunday(dt.year) + timedelta(49)).date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.WHIT_MONDAY)
 def __whit_monday(dt):
     return dt.date() == (get_easter_sunday(dt.year) + timedelta(50)).date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.JUNE_17TH)
 def __june_17th(dt):
     return dt.month == 6 and dt.day == 17
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.MERCHANT_HOLIDAY)
 def __merchant_holiday(dt):
     if dt.month != 8:
         return False
@@ -153,37 +171,65 @@ def __merchant_holiday(dt):
         d = d + timedelta(days=1)
     return dt.date() == d.date()
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.CHRISTMAS_EVE)
 def __christmas_eve(dt):
     return dt.month == 12 and dt.day == 24
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.CHRISTMAST_DAY)
 def __christmast_day(dt):
     return dt.month == 12 and dt.day == 25
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.SECOND_DAY_OF_CHRISTMAS)
 def __second_day_of_christmas(dt):
     return dt.month == 12 and dt.day == 26
 
-@__holiday_fun
+
+@__holiday_fun(holiday_names.NEW_YEARS_EVE)
 def __new_years_eve(dt):
     return dt.month == 12 and dt.day == 31
+
 
 def is_weekday(dt):
     weekday = datetime.isoweekday(dt)
     return 1 <= weekday <= 5
 
+
 def is_holiday(dt):
-    """ Accepts a datetime object, returns True if it is a holiday, False otherwise. """
-    for fun in __holiday_funs:
+    """
+        Accepts a datetime object, returns True if it is a holiday,
+        False otherwise.
+    """
+    for _, fun in __holiday_funs.items():
         if fun(dt):
             return True
     return False
 
+
 def is_businessday(dt):
-    """ Accepts a datetime object, returns True if it is a business day, False otherwise. """
+    """
+        Accepts a datetime object, returns True if it is a business day,
+        False otherwise.
+    """
     return is_weekday(dt) and not is_holiday(dt)
 
+
 def is_bankday(dt):
-    """ Accepts a datetime object, returns True if it represents a bank day. """
+    """
+        Accepts a datetime object, returns True if it
+        represents a bank day.
+    """
     return is_businessday(dt) or (__new_years_eve(dt) and is_weekday(dt))
+
+
+def get_holiday_name(dt):
+    """
+        Accepts a datetime object, returns the name of the holiday from
+        icelandic_holidays.holiday_names if it is a holiday, None otherwise
+    """
+    for name, fun in __holiday_funs.items():
+        if fun(dt):
+            return name
+    return None
