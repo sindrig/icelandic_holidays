@@ -30,6 +30,6 @@ setup(name = "icelandic_holidays",
       url = "http://github.com/solvip/icelandic_holidays",
       description = "A Python library written to determine if a day is an Icelandic holiday or a business day.",
       long_description = open("README.md").read(),
-      py_modules = ["icelandic_holidays"],
+      packages = ["icelandic_holidays"],
       test_suite='tests',
     )

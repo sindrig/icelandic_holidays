@@ -45,7 +45,7 @@ class HolidayTests(unittest.TestCase):
             holiday_names.WHIT_MONDAY: datetime(2013, 5, 20),
             holiday_names.JUNE_17TH: datetime(2013, 6, 17),
             holiday_names.MERCHANT_HOLIDAY: datetime(2013, 8, 5),
-            holiday_names.CHRISTMAST_DAY: datetime(2013, 12, 25),
+            holiday_names.CHRISTMAS_DAY: datetime(2013, 12, 25),
             holiday_names.SECOND_DAY_OF_CHRISTMAS: datetime(2013, 12, 26)
         }
 

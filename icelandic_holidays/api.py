@@ -177,8 +177,8 @@ def __christmas_eve(dt):
     return dt.month == 12 and dt.day == 24
 
 
-@__holiday_fun(holiday_names.CHRISTMAST_DAY)
-def __christmast_day(dt):
+@__holiday_fun(holiday_names.CHRISTMAS_DAY)
+def __christmas_day(dt):
     return dt.month == 12 and dt.day == 25
 
 
